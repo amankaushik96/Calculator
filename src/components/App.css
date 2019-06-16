@@ -2,6 +2,20 @@
 	position: relative;
 }
 
+.history-parent {
+	position: relative;
+}
+
+.cal-history {
+	width: 100%;
+	font-size: 35px;
+	position: absolute;
+	text-align: end;
+	font-family: 'Exo', sans-serif;
+	right: 10px;
+	top: -22px;
+}
+
 .cal-parent {
 	display: flex;
 	width: 100%;

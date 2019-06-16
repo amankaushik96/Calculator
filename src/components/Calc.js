@@ -3,60 +3,114 @@ import './App.css';
 import InputBox from './ResultDisplay';
 
 class Calc extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			symSelected: null,
-			textbox: '',
-			firstNum: 0,
-			isDot: false,
-			secondNum: 0,
-			curr: null,
-			resultComputed: false
-		};
-	}
-	setVal = val => {
-		this.setState({ curr: val });
+	state = {
+		symSelected: null,
+		textbox: '',
+		firstNum: 0,
+		isDot: false,
+		secondNum: 0,
+		curr: null,
+		resultComputed: false
+	};
+
+	getNumberOrDot = val => {
 		if (
 			val !== 'AC' &&
 			val !== '=' &&
 			(val !== '+' && val !== '-' && val !== 'X' && val !== '/')
 		) {
-			if (
-				val === '.' &&
-				this.state.textbox !== '' &&
-				!this.state.isDot &&
-				!this.state.resultComputed
-			) {
+			return true;
+		}
+		return false;
+	};
+
+	isDotAllowed = val => {
+		if (
+			val === '.' &&
+			this.state.textbox !== '' &&
+			!this.state.isDot &&
+			!this.state.resultComputed
+		) {
+			return true;
+		}
+		return false;
+	};
+
+	isFirstLetterDot = val => {
+		if (val === '.' && this.state.textbox === '' && !this.state.isDot) {
+			return true;
+		}
+		return false;
+	};
+
+	isNumberAndResultNotComputed = val => {
+		if (val !== '.' && !this.state.resultComputed) return true;
+		return false;
+	};
+
+	firstNumZero = val => {
+		if (
+			(val === 0 &&
+				(this.state.textbox || this.state.textbox === 0) &&
+				this.state.textbox.toString().indexOf('0') === 0) ||
+			(val === '00' && this.state.textbox === '')
+		)
+			return true;
+		return false;
+	};
+
+	isSymbolSelectedOperator = val => {
+		if (
+			this.state.symSelected === '+' ||
+			this.state.symSelected === 'X' ||
+			this.state.symSelected === '-' ||
+			this.state.symSelected === '/'
+		)
+			return true;
+		return false;
+	};
+
+	resultComputedAndKeyPressed = val => {
+		let textboxval = '';
+		if (val === '.') {
+			textboxval = '0.';
+		} else {
+			textboxval = val;
+		}
+		this.setState({
+			resultComputed: false,
+			isDot: false,
+			firstNum: 0,
+			secondNum: 0,
+			textbox: textboxval,
+			symSelected: null
+		});
+	};
+
+	isOperator = val => {
+		if (val === '+' || val === '-' || val === 'X' || val === '/')
+			return true;
+		return false;
+	};
+
+	setVal = val => {
+		this.setState({ curr: val });
+		if (this.getNumberOrDot(val)) {
+			if (this.isDotAllowed(val)) {
 				this.setState({
 					isDot: true,
 					textbox: '' + this.state.textbox + val,
 					resultComputed: false
 				});
-			} else if (
-				val === '.' &&
-				this.state.textbox === '' &&
-				!this.state.isDot
-			) {
+			} else if (this.isFirstLetterDot(val)) {
 				this.setState({
 					isDot: true,
 					textbox: '0' + val,
 					resultComputed: false
 				});
-			} else if (val !== '.' && !this.state.resultComputed) {
-				if (
-					(val === 0 &&
-						(this.state.textbox || this.state.textbox === 0) &&
-						this.state.textbox.toString().indexOf('0') === 0) ||
-					(val === '00' && this.state.textbox === '')
-				)
-					return;
-				if (
-					this.state.symSelected === '+' ||
-					this.state.symSelected === 'X' ||
-					this.state.symSelected === '-' ||
-					this.state.symSelected === '/'
-				) {
+			} else if (this.isNumberAndResultNotComputed(val)) {
+				if (this.firstNumZero(val)) return;
+				if (this.isSymbolSelectedOperator(val)) {
 					this.setState({
 						secondNum: '' + this.state.textbox + val
 					});
@@ -66,20 +120,7 @@ class Calc extends React.Component {
 					resultComputed: false
 				});
 			} else if (this.state.resultComputed) {
-				let textboxval = '';
-				if (val === '.') {
-					textboxval = '0.';
-				} else {
-					textboxval = val;
-				}
-				this.setState({
-					resultComputed: false,
-					isDot: false,
-					firstNum: 0,
-					secondNum: 0,
-					textbox: textboxval,
-					symSelected: null
-				});
+				this.resultComputedAndKeyPressed(val);
 			}
 		} else {
 			if (val === 'AC') {
@@ -91,12 +132,7 @@ class Calc extends React.Component {
 					resultComputed: false,
 					isDot: false
 				});
-			} else if (
-				val === '+' ||
-				val === '-' ||
-				val === 'X' ||
-				val === '/'
-			) {
+			} else if (this.isOperator(val)) {
 				this.setState({ symSelected: val });
 				if (this.state.textbox !== '') {
 					this.setState(
@@ -130,24 +166,10 @@ class Calc extends React.Component {
 		let tot = 0,
 			secondNum = parseFloat(this.state.secondNum);
 		if (val === '=' && this.state.firstNum && this.state.secondNum) {
-			if (
-				this.state.curr === '+' ||
-				this.state.curr === '-' ||
-				this.state.curr === 'X' ||
-				this.state.curr === '/' ||
-				this.state.curr === '='
-			) {
+			if (this.getSymbols()) {
 				return;
 			}
-			if (sym === '-') {
-				tot = firstNum - secondNum;
-			} else if (sym === '+') {
-				tot = firstNum + secondNum;
-			} else if (sym === '/') {
-				tot = firstNum / secondNum;
-			} else {
-				tot = firstNum * secondNum;
-			}
+			const tot = this.doTotal(sym, firstNum, secondNum);
 			this.setState({
 				textbox: '' + tot,
 				firstNum: tot,
@@ -158,28 +180,45 @@ class Calc extends React.Component {
 		} else if (val !== '=') {
 			secondNum = parseFloat(this.state.secondNum);
 			if (secondNum) {
-				if (sym === '-') {
-					tot = firstNum - secondNum;
-				} else if (sym === '+') {
-					tot = firstNum + secondNum;
-				} else if (sym === '/') {
-					tot = firstNum / secondNum;
-				} else {
-					tot = firstNum * secondNum;
-				}
+				const tot = this.doTotal(sym, firstNum, secondNum);
 				this.setState({
 					textbox: '',
 					firstNum: tot,
 					secondNum: 0
 				});
 			} else {
-				const secN = parseFloat(this.state.textbox);
 				this.setState({
-					textbox: '',
-					secondNum: secN
+					textbox: ''
 				});
 			}
 		}
+	};
+
+	getSymbols = () => {
+		if (
+			this.state.curr === '+' ||
+			this.state.curr === '-' ||
+			this.state.curr === 'X' ||
+			this.state.curr === '/' ||
+			this.state.curr === '='
+		) {
+			return true;
+		}
+		return false;
+	};
+
+	doTotal = (sym, firstNum, secondNum) => {
+		let tot = 0;
+		if (sym === '-') {
+			tot = firstNum - secondNum;
+		} else if (sym === '+') {
+			tot = firstNum + secondNum;
+		} else if (sym === '/') {
+			tot = firstNum / secondNum;
+		} else {
+			tot = firstNum * secondNum;
+		}
+		return tot;
 	};
 
 	updateTextBox = (val, isBack) => {
@@ -191,6 +230,11 @@ class Calc extends React.Component {
 		console.log(this.state);
 		return (
 			<div className="parent-container">
+				<label className="cal-history">
+					{this.state.firstNum +
+						this.state.symSelected +
+						this.state.secondNum}
+				</label>
 				<InputBox
 					val={this.state.textbox}
 					update={this.updateTextBox}
