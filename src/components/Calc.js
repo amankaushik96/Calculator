@@ -16,10 +16,11 @@ class Calc extends React.Component {
 		};
 	}
 	setVal = val => {
+		this.setState({ curr: val });
 		if (
 			val !== 'AC' &&
 			val !== '=' &&
-			(val !== '+' && val !== '-' && val !== 'X')
+			(val !== '+' && val !== '-' && val !== 'X' && val !== '/')
 		) {
 			if (
 				val === '.' &&
@@ -44,17 +45,21 @@ class Calc extends React.Component {
 				});
 			} else if (val !== '.' && !this.state.resultComputed) {
 				if (
-					val === 0 &&
-					(this.state.textbox || this.state.textbox === 0) &&
-					this.state.textbox.toString().indexOf('0') === 0
+					(val === 0 &&
+						(this.state.textbox || this.state.textbox === 0) &&
+						this.state.textbox.toString().indexOf('0') === 0) ||
+					(val === '00' && this.state.textbox === '')
 				)
 					return;
 				if (
 					this.state.symSelected === '+' ||
 					this.state.symSelected === 'X' ||
-					this.state.symSelected === '-'
+					this.state.symSelected === '-' ||
+					this.state.symSelected === '/'
 				) {
-					this.setState({ secondNum: '' + this.state.textbox + val });
+					this.setState({
+						secondNum: '' + this.state.textbox + val
+					});
 				}
 				this.setState({
 					textbox: '' + this.state.textbox + val,
@@ -86,7 +91,12 @@ class Calc extends React.Component {
 					resultComputed: false,
 					isDot: false
 				});
-			} else if (val === '+' || val === '-' || val === 'X') {
+			} else if (
+				val === '+' ||
+				val === '-' ||
+				val === 'X' ||
+				val === '/'
+			) {
 				this.setState({ symSelected: val });
 				if (this.state.textbox !== '') {
 					this.setState(
@@ -120,10 +130,21 @@ class Calc extends React.Component {
 		let tot = 0,
 			secondNum = parseFloat(this.state.secondNum);
 		if (val === '=' && this.state.firstNum && this.state.secondNum) {
+			if (
+				this.state.curr === '+' ||
+				this.state.curr === '-' ||
+				this.state.curr === 'X' ||
+				this.state.curr === '/' ||
+				this.state.curr === '='
+			) {
+				return;
+			}
 			if (sym === '-') {
 				tot = firstNum - secondNum;
 			} else if (sym === '+') {
 				tot = firstNum + secondNum;
+			} else if (sym === '/') {
+				tot = firstNum / secondNum;
 			} else {
 				tot = firstNum * secondNum;
 			}
@@ -141,6 +162,8 @@ class Calc extends React.Component {
 					tot = firstNum - secondNum;
 				} else if (sym === '+') {
 					tot = firstNum + secondNum;
+				} else if (sym === '/') {
+					tot = firstNum / secondNum;
 				} else {
 					tot = firstNum * secondNum;
 				}
@@ -279,7 +302,14 @@ class Calc extends React.Component {
 					>
 						0
 					</div>
-					<div className="item">00</div>
+					<div
+						onClick={() => {
+							this.setVal('00');
+						}}
+						className="item"
+					>
+						00
+					</div>
 					<div
 						onClick={() => {
 							this.setVal('.');
@@ -304,7 +334,14 @@ class Calc extends React.Component {
 					>
 						AC
 					</div>
-					<div className="item sym-item">/</div>
+					<div
+						onClick={() => {
+							this.setVal('/');
+						}}
+						className="item sym-item"
+					>
+						/
+					</div>
 				</div>
 				<div className="more-menu">. . .</div>
 			</div>
