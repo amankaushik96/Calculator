@@ -6,7 +6,7 @@ class Calc extends React.Component {
 	state = {
 		symSelected: null,
 		textbox: '',
-		firstNum: 0,
+		firstNum: null,
 		isDot: false,
 		secondNum: null,
 		curr: null,
@@ -71,17 +71,29 @@ class Calc extends React.Component {
 	};
 
 	resultComputedAndKeyPressed = val => {
-		let textboxval = '';
+		let textboxval = '',
+			fNum = 0,
+			sNum;
 		if (val === '.') {
 			textboxval = '0.';
 		} else {
 			textboxval = val;
 		}
+		if (this.isSymbolSelectedOperator(val)) {
+			fNum = this.state.firstNum;
+		} else {
+			fNum = null;
+		}
+		if (this.isSymbolSelectedOperator(val)) {
+			sNum = this.state.textbox;
+		} else {
+			sNum = null;
+		}
 		this.setState({
 			resultComputed: false,
 			isDot: false,
-			firstNum: 0,
-			secondNum: null,
+			firstNum: fNum,
+			secondNum: sNum,
 			textbox: textboxval,
 			symSelected: null
 		});
@@ -127,32 +139,24 @@ class Calc extends React.Component {
 				this.setState({
 					textbox: '',
 					symSelected: null,
-					firstNum: 0,
+					firstNum: null,
 					secondNum: null,
 					resultComputed: false,
 					isDot: false
 				});
 			} else if (this.isOperator(val)) {
-				this.setState({ symSelected: val });
+				this.setState({ symSelected: val, resultComputed: false });
 				if (this.state.textbox !== '') {
-					this.setState(
-						{
+					if (this.state.firstNum !== null) {
+						this.renderTotal(val);
+					} else if (this.state.firstNum === null) {
+						this.setState({
 							firstNum: parseFloat(this.state.textbox),
+							textbox: '',
+							isDot: false,
 							resultComputed: false
-						},
-						() => {
-							if (this.state.firstNum !== 0) {
-								this.renderTotal(val);
-							} else if (this.state.firstNum === 0) {
-								this.setState({
-									firstNum: parseFloat(this.state.textbox),
-									textbox: '',
-									isDot: false,
-									resultComputed: false
-								});
-							}
-						}
-					);
+						});
+					}
 				}
 			} else {
 				this.renderTotal(val);
@@ -165,7 +169,11 @@ class Calc extends React.Component {
 		const sym = this.state.symSelected;
 		let tot = 0,
 			secondNum = parseFloat(this.state.secondNum);
-		if (val === '=' && this.state.firstNum && this.state.secondNum) {
+		if (
+			val === '=' &&
+			this.state.firstNum !== null &&
+			this.state.secondNum
+		) {
 			if (this.getSymbols()) {
 				return;
 			}
@@ -221,18 +229,22 @@ class Calc extends React.Component {
 		return tot;
 	};
 
-	updateTextBox = (val, isBack) => {
+	updateTextBox = (val, isBack, insertedVal) => {
 		if (isBack) this.setState({ textbox: '' + val });
-		else this.setState({ textbox: '' + this.state.textbox + val });
+		else {
+			this.setState({ textbox: '' + val });
+			this.setVal(insertedVal);
+		}
 	};
 
 	render() {
-		console.log(this.state);
 		return (
 			<div className="parent-container">
 				<label className="cal-history">
-					{this.state.firstNum +
-						this.state.symSelected +
+					{(this.state.firstNum !== null ? this.state.firstNum : '') +
+						(this.state.symSelected !== null
+							? this.state.symSelected
+							: '') +
 						(this.state.secondNum !== null
 							? this.state.secondNum
 							: '')}
@@ -240,6 +252,7 @@ class Calc extends React.Component {
 				<InputBox
 					val={this.state.textbox}
 					update={this.updateTextBox}
+					setVal={this.setVal}
 				/>
 				<div className="cal-parent">
 					<div
@@ -283,7 +296,6 @@ class Calc extends React.Component {
 						4
 					</div>
 					<div
-						o
 						onClick={() => {
 							this.setVal(5);
 						}}
@@ -300,7 +312,6 @@ class Calc extends React.Component {
 						6
 					</div>
 					<div
-						o
 						onClick={() => {
 							this.setVal('-');
 						}}

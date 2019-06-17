@@ -1,9 +1,6 @@
 .parent-container {
 	position: relative;
-}
-
-.history-parent {
-	position: relative;
+	margin: 20px;
 }
 
 .cal-history {
@@ -14,6 +11,7 @@
 	font-family: 'Exo', sans-serif;
 	right: 10px;
 	top: -22px;
+	color: black;
 }
 
 .cal-parent {
@@ -90,6 +88,8 @@
 }
 
 .inputBox {
+	padding-right: 0;
+	padding-top: 0;
 	outline: none;
 	color: white;
 	position: relative;
