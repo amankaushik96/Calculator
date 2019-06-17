@@ -105,13 +105,15 @@ class Calc extends React.Component {
 		return false;
 	};
 
-	setVal = val => {
+	setVal = (val, isFromTextBox, fullValue) => {
 		this.setState({ curr: val });
 		if (this.getNumberOrDot(val)) {
 			if (this.isDotAllowed(val)) {
 				this.setState({
 					isDot: true,
-					textbox: '' + this.state.textbox + val,
+					textbox: !isFromTextBox
+						? '' + this.state.textbox + val
+						: fullValue,
 					resultComputed: false
 				});
 			} else if (this.isFirstLetterDot(val)) {
@@ -128,7 +130,9 @@ class Calc extends React.Component {
 					});
 				}
 				this.setState({
-					textbox: '' + this.state.textbox + val,
+					textbox: !isFromTextBox
+						? '' + this.state.textbox + val
+						: fullValue,
 					resultComputed: false
 				});
 			} else if (this.state.resultComputed) {
@@ -233,7 +237,7 @@ class Calc extends React.Component {
 		if (isBack) this.setState({ textbox: '' + val });
 		else {
 			this.setState({ textbox: '' + val });
-			this.setVal(insertedVal);
+			this.setVal(insertedVal, true, val);
 		}
 	};
 

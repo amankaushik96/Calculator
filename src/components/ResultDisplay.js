@@ -6,6 +6,7 @@ class ResultDisplay extends React.Component {
 
 	handleChange = e => {
 		const val = e.target.value;
+		if (val.indexOf('00') === 0) return;
 		let obj = this.computeDifference(this.props.val, val);
 		if (this.props.val && this.props.val.length > val.length) {
 			//Backspace Detected
@@ -39,6 +40,7 @@ class ResultDisplay extends React.Component {
 					break;
 				}
 			}
+			updatedIndex = parseInt(updatedIndex);
 			let firstPart = newVal.slice(0, updatedIndex);
 			let secondPart = newVal.slice(updatedIndex + 1, newVal.length);
 			finalString = firstPart + updatedVal + secondPart;
@@ -49,6 +51,7 @@ class ResultDisplay extends React.Component {
 	};
 
 	handleKeyUp = keyCode => {
+		console.log(keyCode);
 		return;
 		if (keyCode === 16) this.setState({ isShift: true });
 		if (keyCode === 187 && this.state.isShift) {
