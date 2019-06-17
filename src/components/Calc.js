@@ -8,7 +8,7 @@ class Calc extends React.Component {
 		textbox: '',
 		firstNum: 0,
 		isDot: false,
-		secondNum: 0,
+		secondNum: null,
 		curr: null,
 		resultComputed: false
 	};
@@ -81,7 +81,7 @@ class Calc extends React.Component {
 			resultComputed: false,
 			isDot: false,
 			firstNum: 0,
-			secondNum: 0,
+			secondNum: null,
 			textbox: textboxval,
 			symSelected: null
 		});
@@ -128,7 +128,7 @@ class Calc extends React.Component {
 					textbox: '',
 					symSelected: null,
 					firstNum: 0,
-					secondNum: 0,
+					secondNum: null,
 					resultComputed: false,
 					isDot: false
 				});
@@ -173,7 +173,7 @@ class Calc extends React.Component {
 			this.setState({
 				textbox: '' + tot,
 				firstNum: tot,
-				secondNum: 0,
+				secondNum: null,
 				resultComputed: true,
 				symSelected: null
 			});
@@ -184,7 +184,7 @@ class Calc extends React.Component {
 				this.setState({
 					textbox: '',
 					firstNum: tot,
-					secondNum: 0
+					secondNum: null
 				});
 			} else {
 				this.setState({
@@ -233,7 +233,9 @@ class Calc extends React.Component {
 				<label className="cal-history">
 					{this.state.firstNum +
 						this.state.symSelected +
-						this.state.secondNum}
+						(this.state.secondNum !== null
+							? this.state.secondNum
+							: '')}
 				</label>
 				<InputBox
 					val={this.state.textbox}
